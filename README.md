@@ -15,7 +15,12 @@ Install _fastlane_ using
 or alternatively using `brew install fastlane`
 
 #App Center Setup
-Checkout below properties in local.properties file that are mandatory for Release/QA pipeline setup.
+
+1. Create an account and setup an organization.
+2. Create two apps one for Release and one for QA.
+3. Create API token for appcenter : https://appcenter.ms/settings/apitokens
+4. Add below properties in local.properties file that are mandatory for Release/QA pipeline setup.
+
 ```
 #Setup new token @ https://appcenter.ms/settings/apitokens
 APPCENTER_API_TOKEN=<YOUR_API_TOKEN>
