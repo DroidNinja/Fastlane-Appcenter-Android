@@ -1,0 +1,133 @@
+ext.deps = [:]
+def versions = [:]
+versions.support="1.1.0"
+versions.legacy="1.0.0"
+versions.cardView="1.0.0"
+versions.recyclerView="1.1.0"
+versions.multidex="2.0.1"
+versions.butterknife="10.2.0"
+versions.retrofit="2.6.1"
+versions.okhttp="3.12.2"  //should not update until we have minsdk of lollipop
+versions.constraintLayout="1.1.3"
+versions.permissionDispatcher="4.6.0"
+versions.room="2.2.3"
+versions.dagger="2.27"
+versions.lombok="1.18.4"
+versions.leakcanary="2.1"
+versions.kotlinVersion = '1.3.72'
+versions.arch_core = "2.1.0"
+versions.hamcrest = "1.3"
+versions.junit = "4.12"
+versions.mockito = "2.25.0"
+versions.fragment = "1.2.4"
+def deps = [:]
+
+def support = [:]
+support.appCompat="androidx.appcompat:appcompat:$versions.support"
+support.supportV4="androidx.legacy:legacy-support-v4:$versions.legacy"
+support.cardView="androidx.cardview:cardview:$versions.cardView"
+support.annotations="androidx.annotation:annotation:1.1.0"
+support.multidex="androidx.multidex:multidex:$versions.multidex"
+support.design="com.google.android.material:material:1.1.0"
+support.recyclerview="androidx.recyclerview:recyclerview:$versions.recyclerView"
+support.recyclerviewSelection="androidx.recyclerview:recyclerview-selection:1.0.0"
+support.constraintLayout="androidx.constraintlayout:constraintlayout:$versions.constraintLayout"
+support.coreKtx="androidx.core:core-ktx:1.3.0"
+support.localBroadcastManager="androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"
+support.navigationFragment="androidx.navigation:navigation-fragment-ktx:2.3.0"
+support.navigationUIKtx="androidx.navigation:navigation-ui-ktx:2.3.0"
+deps.support = support
+
+def playservices = [:]
+playservices.ads="com.google.android.gms:play-services-ads:16.0.0"
+playservices.wearable="com.google.android.gms:play-services-wearable:16.0.1"
+playservices.vision="com.google.android.gms:play-services-vision:17.0.2"
+playservices.location="com.google.android.gms:play-services-location:17.0.0"
+playservices.maps="com.google.android.gms:play-services-maps:17.0.0"
+playservices.auth="com.google.android.gms:play-services-auth:17.0.0"
+playservices.authPhone="com.google.android.gms:play-services-auth-api-phone:17.4.0"
+playservices.places="com.google.android.libraries.places:places:2.3.0"
+playservices.placesCompat="com.google.android.libraries.places:places-compat:2.3.0"
+playservices.core="com.google.android.play:core:1.7.3"
+deps.playservices = playservices
+
+def arch = [:]
+arch.lifecycleExtensions="androidx.lifecycle:lifecycle-extensions:2.2.0"
+arch.lifecycleRuntime="androidx.lifecycle:lifecycle-runtime:2.2.0"
+arch.lifecycleCommonJava="androidx.lifecycle:lifecycle-common-java8:2.2.0"
+arch.lifecycleViewModel="androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+arch.room="androidx.room:room-runtime:$versions.room"
+arch.workmanager ="androidx.work:work-runtime:2.3.4"
+arch.workmanagerktx ="androidx.work:work-runtime-ktx:2.3.4"
+arch.coreKtx ="androidx.core:core-ktx:1.2.0"
+deps.arch = arch
+
+def firebase = [:]
+firebase.core="com.google.firebase:firebase-core:17.4.2"
+firebase.crashlytics="com.google.firebase:firebase-crashlytics:17.0.0"
+firebase.room="androidx.room:room-runtime:$versions.room"
+firebase.fcm="com.google.firebase:firebase-messaging:20.2.0"
+firebase.iid="com.google.firebase:firebase-iid:20.2.0"
+firebase.remoteConfig = "com.google.firebase:firebase-config:19.1.4"
+firebase.performance = "com.google.firebase:firebase-perf:19.0.7"
+deps.firebase = firebase
+
+def sdk = [:]
+sdk.coroutines="org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7"
+sdk.coroutinesAndroid="org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.7"
+sdk.kotlin="org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlinVersion"
+sdk.kotlinExtensions="org.jetbrains.kotlin:kotlin-android-extensions:$versions.kotlinVersion"
+deps.sdk = sdk
+
+def fragment = [:]
+fragment.runtime = "androidx.fragment:fragment:${versions.fragment}"
+fragment.runtime_ktx = "androidx.fragment:fragment-ktx:${versions.fragment}"
+fragment.testing = "androidx.fragment:fragment-testing:${versions.fragment}"
+deps.fragment = fragment
+
+def viewpager = [:]
+viewpager.viewpager2 = "androidx.viewpager2:viewpager2:1.0.0"
+deps.viewpager = viewpager
+
+def processors = [:]
+processors.dagger="com.google.dagger:dagger-compiler:$versions.dagger"
+processors.daggerAndroid="com.google.dagger:dagger-android-processor:$versions.dagger"
+deps.processors = processors
+
+def devOnly = [:]
+devOnly.leakcanary="com.squareup.leakcanary:leakcanary-android:$versions.leakcanary"
+devOnly.leakcanaryNoOp="com.squareup.leakcanary:leakcanary-android-no-op:$versions.leakcanary"
+devOnly.stetho="com.facebook.stetho:stetho:1.5.1"
+devOnly.stethoOkhttp="com.facebook.stetho:stetho-okhttp3:1.5.1"
+devOnly.toolarge="com.gu.android:toolargetool:0.2.1@aar"
+devOnly.chuck = "com.github.ChuckerTeam.Chucker:library:3.2.0"
+deps.devOnly = devOnly
+
+def test = [:]
+test.archCore="androidx.arch.core:core-testing:$versions.arch_core"
+test.hamcrest="org.hamcrest:hamcrest-all:$versions.hamcrest"
+test.mockRetrofit="com.squareup.okhttp:mockwebserver:2.7.2"
+test.junit="junit:junit:$versions.junit"
+test.testRunner="androidx.test:runner:1.2.0"
+test.espressoCore="androidx.test.espresso:espresso-core:3.2.0"
+test.espressoIntents="com.android.support.test.espresso:espresso-intents:3.0.1"
+test.kotlinCoroutineTest="org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.2"
+
+def mockito=[:]
+mockito.core="org.mockito:mockito-core:$versions.mockito"
+mockito.android="org.mockito:mockito-android:$versions.mockito"
+test.mockito = mockito
+
+deps.test = test
+
+ext.deps = deps
+ext.versions = versions
+
+def addRepos(RepositoryHandler handler) {
+    handler.google()
+    handler.jcenter()
+    handler.maven { url 'https://dl.bintray.com/guardian/android' }
+    handler.mavenCentral()
+    handler.maven { url "https://jitpack.io" }
+}
+ext.addRepos = this.&addRepos

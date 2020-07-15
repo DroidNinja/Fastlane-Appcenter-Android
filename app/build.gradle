@@ -1,0 +1,49 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.0"
+
+    defaultConfig {
+        applicationId "com.droidninja.fastlanedemo"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.getBuildProperty("VERSION_CODE", rootProject.ext.versionCode as String) as int
+        versionName rootProject.ext.getBuildProperty("VERSION_NAME", rootProject.ext.versionName)
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation rootProject.ext.deps.sdk.kotlin
+    implementation rootProject.ext.deps.support.coreKtx
+    implementation rootProject.ext.deps.support.recyclerview
+    implementation rootProject.ext.deps.support.appCompat
+    implementation rootProject.ext.deps.support.constraintLayout
+    implementation rootProject.ext.deps.support.design
+    implementation rootProject.ext.deps.support.navigationFragment
+    implementation rootProject.ext.deps.support.navigationUIKtx
+
+    testImplementation rootProject.ext.deps.test.junit
+    androidTestImplementation rootProject.ext.deps.test.testRunner
+    androidTestImplementation rootProject.ext.deps.test.espressoCore
+
+}
