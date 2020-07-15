@@ -17,19 +17,7 @@ default_platform(:android)
 
 platform :android do
    before_all do
-    #--------------------------------------------
-    #Setup Gdrive Keys
-    #--------------------------------------------
-    properties = load_properties("../local.properties")
-
-    #Folder ids of gdrive file. Make sure to share these folders with <gdrive-fastlane@apkrelease-226211.iam.gserviceaccount.com>
-    ENV['RELEASE_FOLDER_ID']=properties['RELEASE_FOLDER_ID']
-    ENV['QA_FOLDER_ID']=properties['QA_FOLDER_ID']
-
-    #path to gdrive service account key (will be shared in email)
-    ENV['GDRIVE_JSON']=properties['GDRIVE_JSON']
-
-    #For more info, https://github.com/bskim45/fastlane-plugin-google_drive
+      properties = load_properties("../local.properties")
 
       #--------------------------------------------
       #Setup App Center keys
@@ -39,75 +27,14 @@ platform :android do
       ENV['APPCENTER_RELEASE']=properties['APPCENTER_RELEASE']
       ENV['APPCENTER_QA']=properties['APPCENTER_QA']
       ENV['APPCENTER_OWNER_NAME']=properties['APPCENTER_OWNER_NAME']
+
   end
 
- lane :gdrive do |values|
-            # Get flavor value
-            buildType = values[:buildType]
-            puts "#--------------------------------------------"
-            puts "# Build type: " + buildType
-            puts "#--------------------------------------------"
-
-            #--------------------------------------------
-            #Take version code or use build.gradle value
-            #--------------------------------------------
-
-            versionCode = UI.input("Version code?")
-            if versionCode == ''
-                versionCode = get_app_version_code
-            end
-
-            puts "#--------------------------------------------"
-            puts "# Version code: " + versionCode
-            puts "#--------------------------------------------"
-
-            #--------------------------------------------
-            #Take version name or use build.gradle value
-            #--------------------------------------------
-
-            versionName = UI.input("Version name?")
-            if versionName == ''
-                versionName = get_app_version_name
-            end
-
-            puts "#--------------------------------------------"
-            puts "# Version name: " + versionName
-            puts "#--------------------------------------------"
-
-            #--------------------------------------------
-            # Build release app
-            #--------------------------------------------
-
-            build_app_release_flavor(buildType, versionCode, versionName)
-
-            # Get APK path
-            apkPath = get_apk_file_path(buildType,versionCode, versionName)
-            puts "***** APK path: " + apkPath
-
-            if buildType == 'release'
-                folderId = ENV['RELEASE_FOLDER_ID']
-             else
-               folderId = ENV['QA_FOLDER_ID']
-             end
-
-            folderTitle = "V " + versionCode + " - " + versionName
-             puts "***** Folder title: " + folderTitle
-
-             # Create Google drive folder
-             create_google_drive_folder_fun(folderId,folderTitle)
-
-             folderID = Fastlane::Actions.lane_context[Fastlane::Actions::SharedValues::GDRIVE_CREATED_FOLDER_ID]
-             folderURL  = Fastlane::Actions.lane_context[Fastlane::Actions::SharedValues::GDRIVE_CREATED_FOLDER_URL]
-
-             puts "***** Folder ID: " + folderID
-             puts "***** Folder URL: " + folderURL
-
-            # Upload to G drive
-            upload_to_google_drive_fun(apkPath,folderID)
-
-end
-
  lane :appcenter do |values|
+           if ENV['APPCENTER_API_TOKEN'] == nil || ENV['APPCENTER_RELEASE'] == nil || ENV['APPCENTER_QA'] == nil || ENV['APPCENTER_OWNER_NAME'] == nil
+                UI.abort_with_message!('Please setup these properties in your local.properties file: APPCENTER_API_TOKEN, APPCENTER_RELEASE, APPCENTER_QA, APPCENTER_OWNER_NAME')
+           end
+
             # Get flavor value
             buildType = values[:buildType]
 
@@ -115,7 +42,12 @@ end
             puts "# Build type: " + buildType
             puts "#--------------------------------------------"
 
+            #This command will list down JIRA Ids from commit messages if you use JIRA in your organization
+            #You can also use "sh "git log `git describe --tags --abbrev=0 HEAD^`..HEAD --format=%s" command to add your commit msgs to your release notes
+            # Or you can `get_release_notes_input` method for release notes input from command line
             release_notes = sh "git log `git describe --tags --abbrev=0 HEAD^`..HEAD --format=%s | grep -Eo '([A-Z]{3,}-)([0-9]+)' | sort | uniq"
+
+            #These are names of different feature related to your product if you want to give separate builds for different features
             featureName = UI.select("Select your feature: ", ["Feature1", "Default"])
 
             if featureName == 'Default'
@@ -128,11 +60,16 @@ end
                  end
              end
 
-            versionInfo = get_last_build_version(featureName)
-
-            puts "#--------------------------------------------"
-            puts "# Last Uploaded Build Version for "+ featureName +": " + versionInfo['version']
-            puts "#--------------------------------------------"
+            begin
+                versionInfo = get_last_build_version(featureName)
+                if versionInfo != nil
+                    puts "#--------------------------------------------"
+                    puts "# Last Uploaded Build Version for "+ featureName +": " + versionInfo['version']
+                    puts "#--------------------------------------------"
+                end
+            rescue => ex
+                UI.error ex
+            end
 
 
             #--------------------------------------------
@@ -169,11 +106,14 @@ end
 
             # Get APK path
             apkPath = get_apk_file_path(buildType,versionCode, versionName)
-            puts "***** APK path: " + apkPath
+            puts "#--------------------------------------------"
+            puts "# APK path: " + apkPath
+            puts "#--------------------------------------------"
 
             upload_to_appcenter(featureName, apkPath, release_notes)
 end
 
+# Upload to appcenter
 def upload_to_appcenter(appName, apkPath, release_notes)
  appcenter_upload(
       api_token: ENV['APPCENTER_API_TOKEN'],
@@ -186,6 +126,7 @@ def upload_to_appcenter(appName, apkPath, release_notes)
     )
 end
 
+# Get last uploaded build version for a particular feature
 def get_last_build_version(appName)
     appcenter_fetch_version_number(
       api_token: ENV['APPCENTER_API_TOKEN'],
@@ -194,28 +135,7 @@ def get_last_build_version(appName)
     )
 end
 
-
-
-def upload_to_google_drive_fun(apkPath,folderID)
-upload_to_google_drive(
-  drive_keyfile: ENV['GDRIVE_JSON'],
-  service_account: true,
-  folder_id: folderID,
-  upload_files: [apkPath]
-)
-end
-
-
-
-def create_google_drive_folder_fun(folderId,folderTitle)
-create_google_drive_folder(
-   drive_keyfile: ENV['GDRIVE_JSON'],
-  folder_id: folderId,
-  folder_title: folderTitle
-)
-end
-
-
+# Get version name from root level build.gradle
 def get_app_version_name()
   return get_version_code(
     #app_folder_name:"project"
@@ -224,9 +144,7 @@ def get_app_version_name()
   )
 end
 
-
-#
-# This method returns the app_version_code
+# Get version code from root level build.gradle
 def get_app_version_code()
   return get_version_code(
     #app_folder_name:"project"
@@ -235,6 +153,7 @@ def get_app_version_code()
   )
 end
 
+# APK path based on name convention, you have configured in your gradle configuration i.e. append "-qa" in case of QA builds
 def get_apk_file_path(buildType, versionCode, versionName)
   if buildType == 'qa'
       suffix = "-qa"
@@ -244,7 +163,8 @@ def get_apk_file_path(buildType, versionCode, versionName)
   return "app/build/outputs/apk/"+buildType+ "/"+"app_"+versionCode+"_"+versionName + suffix +".apk"
 end
 
-def get_release_notes_path()
+# In case you want to enter release on command line
+def get_release_notes_input()
 releaseNotes = prompt(
             text: "Do you want to add any release notes?",
             multi_line_end_keyword: "END",
@@ -254,7 +174,7 @@ return releaseNotes
 end
 
   # Get file content
- def get_file_as_string(filename, htmlTag)
+def get_file_as_string(filename, htmlTag)
       data = ''
       f = File.open(filename, "r")
       f.each_line do |line|
@@ -265,7 +185,7 @@ end
   end
 
 # This method returns an array
- def get_recipients(file_path)
+def get_recipients(file_path)
   data = ''
       f = File.open(file_path, "r")
       f.each_line do |line|
@@ -277,6 +197,7 @@ end
  end
 
 
+# Gradle Build configuration
 def build_app_release_flavor(type, versionCode, versionName)
    gradle(
           task: "assemble",
@@ -289,6 +210,7 @@ def build_app_release_flavor(type, versionCode, versionName)
       end
 end
 
+#Load properties from file
 def load_properties(properties_filename)
     properties = {}
     File.open(properties_filename, 'r') do |properties_file|

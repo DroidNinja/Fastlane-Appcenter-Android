@@ -16,10 +16,42 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            def signingConfig = rootProject.ext.getSigningConfig('keystores/release.properties')
+            storeFile signingConfig.storeFile
+            storePassword signingConfig.storePassword
+            keyAlias signingConfig.keyAlias
+            keyPassword signingConfig.keyPassword
+        }
+        debug {
+            def signingConfig = rootProject.ext.getSigningConfig('keystores/debug.properties')
+            storeFile signingConfig.storeFile
+            storePassword signingConfig.storePassword
+            keyAlias signingConfig.keyAlias
+            keyPassword signingConfig.keyPassword
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        qa {
+            debuggable true
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-qa"
+            signingConfig signingConfigs.debug
+        }
+        debug {
+            debuggable true
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-dev"
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {
@@ -28,6 +60,29 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    applicationVariants.all { variant ->
+        def isDebug = variant.buildType.name == "debug"
+        //renaming qa and release build apks
+        if (!isDebug) {
+            println("----------------------------------------------")
+            println("Variant name:      " + variant.name)
+            println("Application ID:    " + [variant.mergedFlavor.applicationId, variant.buildType.applicationIdSuffix].findAll().join())
+            println("Build type:        " + variant.buildType.name)
+
+            variant.outputs.all {
+                def versionName = variant.versionName
+                def versionNumber = variant.versionCode.toString()
+                def fileExtension = outputFileName.toString().substring(outputFileName.toString().lastIndexOf(".") + 1)
+                def newName = "app_${versionNumber}_${versionName}.${fileExtension}"
+                outputFileName = newName
+            }
+        }
     }
 }
 
@@ -41,6 +96,10 @@ dependencies {
     implementation rootProject.ext.deps.support.design
     implementation rootProject.ext.deps.support.navigationFragment
     implementation rootProject.ext.deps.support.navigationUIKtx
+    implementation rootProject.ext.deps.fragment.runtime_ktx
+    implementation rootProject.ext.deps.arch.lifecycleExtensions
+    implementation rootProject.ext.deps.arch.lifecycleRuntime
+    implementation rootProject.ext.deps.arch.lifecycleCommonJava
 
     testImplementation rootProject.ext.deps.test.junit
     androidTestImplementation rootProject.ext.deps.test.testRunner

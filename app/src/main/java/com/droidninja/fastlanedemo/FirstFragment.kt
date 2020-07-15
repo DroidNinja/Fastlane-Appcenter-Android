@@ -7,11 +7,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.navigation.fragment.findNavController
+import com.droidninja.fastlanedemo.databinding.FragmentFirstBinding
+import com.droidninja.fastlanedemo.utils.viewBinding
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
  */
 class FirstFragment : Fragment() {
+
+    private val binding by viewBinding(FragmentFirstBinding::bind)
 
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
@@ -27,5 +31,6 @@ class FirstFragment : Fragment() {
         view.findViewById<Button>(R.id.button_first).setOnClickListener {
             findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
         }
+        binding.textviewFirst.text = String.format("Build: %s_%s", BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME)
     }
 }

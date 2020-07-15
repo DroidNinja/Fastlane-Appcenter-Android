@@ -34,3 +34,35 @@ project.ext.getBuildProperty = { property, defaultValue ->
     def value = project.getProperties().get(property)
     return value != null ? value : defaultValue
 }
+
+project.ext.getSigningConfig = { propertiesFilePath ->
+    Properties properties = new Properties()
+    def propFile = new File(propertiesFilePath)
+    def buildProp = [:]
+    if (propFile.canRead()) {
+        properties.load(new FileInputStream(propFile))
+        print(properties)
+        if (properties != null) {
+            buildProp.storeFile = file(project.ext.getPropFromFile(properties,'STORE_FILE'))
+            buildProp.storePassword = project.ext.getPropFromFile(properties,'STORE_PASSWORD')
+            buildProp.keyAlias = project.ext.getPropFromFile(properties,'STORE_ALIAS')
+            buildProp.keyPassword = project.ext.getPropFromFile(properties,'STORE_ALIAS_PASSWORD')
+
+
+
+            return buildProp
+        } else {
+            throw new GradleException('No properties found')
+        }
+    } else {
+        throw new GradleException(' not found : '+ propertiesFilePath)
+    }
+}
+
+project.ext.getPropFromFile = { propFile, propertyName ->
+    if (propFile.containsKey(propertyName)) {
+        return propFile[propertyName]
+    } else {
+        throw new GradleException(propertyName + ' is missing ')
+    }
+}
