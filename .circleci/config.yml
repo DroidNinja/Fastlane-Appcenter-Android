@@ -1,15 +1,12 @@
 version: 2.1
 orbs:
-  ruby: circleci/ruby@0.1.2 
+  android: circleci/android@0.2.0
 
 jobs:
   build:
-    docker:
-      - image: circleci/ruby:2.6.3-stretch-node
-    executor: ruby/default
+    executor: android/android
+
     steps:
       - checkout
       - run:
-          name: Which bundler?
-          command: bundle -v
-      - ruby/bundle-install
+          command: ./gradlew build
