@@ -9,4 +9,4 @@ jobs:
     steps:
       - checkout
       - run:
-          command: ls -la keystores && ./gradlew build
+          command: pwd && ./gradlew build
